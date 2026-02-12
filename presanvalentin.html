@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Un mini detalle mas nuestras fotos 🎀📸</title>
+  <style>
+    :root{
+      --bg1:#fff6fb; --bg2:#ffe3f2; --card:#ffffffcc;
+      --txt:#2b1b23; --muted:#6b4355;
+      --pink:#ff5fa2; --pink2:#ff9ac8;
+      --line:#ffd1e6;
+      --shadow: 0 20px 60px rgba(255,95,162,.18);
+      --radius: 22px;
+      --font: ui-rounded, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans";
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:var(--font); color:var(--txt);
+      min-height:100vh; overflow:hidden; display:grid; place-items:center;
+      background:
+        radial-gradient(900px 500px at 20% 20%, #fff, transparent 60%),
+        radial-gradient(700px 500px at 80% 25%, #fff, transparent 55%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      padding: 18px;
+    }
+    .floatLayer{ position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+    .sticker{
+      position:absolute; opacity:0;
+      transform: translateY(20px) scale(.9);
+      animation: floatUp linear forwards;
+      filter: drop-shadow(0 10px 18px rgba(255,95,162,.20));
+      user-select:none;
+    }
+    @keyframes floatUp{
+      0%{opacity:0; transform: translateY(35px) scale(.85)}
+      12%{opacity:.95}
+      100%{opacity:0; transform: translateY(-120vh) scale(1.25)}
+    }
+
+    .card{
+      width: min(1100px, 94vw);
+      background: var(--card);
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      padding: clamp(16px, 4vw, 28px);
+      position:relative;
+    }
+
+    header{
+      display:flex; justify-content:space-between; align-items:flex-start;
+      gap:14px; flex-wrap:wrap;
+    }
+    .badge{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:10px 14px; border-radius:999px;
+      background:#fff; border:2px solid var(--line);
+      color: var(--muted); font-size: 13.5px;
+      user-select:none;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:50%;
+      background: var(--pink);
+      box-shadow: 0 0 0 6px rgba(255,95,162,.18);
+      animation:pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes pulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.25);opacity:1}}
+
+    h1{margin:12px 0 6px; font-size: clamp(28px, 3.2vw, 46px); letter-spacing:-.02em; line-height:1.05;}
+    .sub{margin:0; color: var(--muted); line-height:1.65; max-width: 78ch; font-size: 14.5px;}
+
+    .grid{
+      margin-top: 16px;
+      display:grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap: 16px;
+    }
+    @media (max-width: 920px){ .grid{grid-template-columns:1fr} }
+
+    .panel{
+      background:#fff;
+      border: 2px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      position:relative;
+      overflow:hidden;
+    }
+    .panel h2{ margin:0 0 8px; font-size:17px; letter-spacing:-.01em; }
+
+    /* ===== Galería ===== */
+    .gallery{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .frame{
+      border-radius: 18px;
+      border: 2px solid var(--line);
+      background: linear-gradient(135deg, #fff, #fff0f8);
+      padding: 10px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .photoArea{
+      position:relative;
+      border-radius: 16px;
+      overflow:hidden;
+      aspect-ratio: 16 / 10;
+      background: #fff0f8;
+      border: 2px dashed #ffb9da;
+      display:grid;
+      place-items:center;
+    }
+
+    .photoArea img{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      display:block;
+      transform: scale(1.02);
+      transition: transform .25s ease;
+    }
+    .photoArea:hover img{ transform: scale(1.06); }
+
+    .overlayTop{
+      position:absolute;
+      left: 10px; right:10px; top:10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 10px;
+      pointer-events:none;
+    }
+    .tag{
+      pointer-events:none;
+      padding: 8px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.88);
+      border: 2px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      box-shadow: 0 10px 20px rgba(0,0,0,.06);
+    }
+
+    .controls{
+      margin-top: 10px;
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .btnRow{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+    button{
+      border:0; border-radius:999px;
+      padding: 12px 18px;
+      font-size: 14.5px;
+      cursor:pointer;
+      transition: transform .12s ease, filter .12s ease;
+      user-select:none;
+    }
+    button:active{transform: translateY(1px) scale(.99)}
+    .primary{
+      background: linear-gradient(135deg, var(--pink), #ff2f76);
+      color:#fff;
+      box-shadow: 0 14px 28px rgba(255,95,162,.25);
+    }
+    .primary:hover{filter: brightness(1.06)}
+    .soft{
+      background:#fff;
+      color: var(--txt);
+      border: 2px solid var(--line);
+    }
+    .ghost{
+      background: transparent;
+      color: var(--muted);
+      border: 2px dashed #ffb9da;
+    }
+
+    .thumbs{
+      display:flex;
+      gap: 10px;
+      overflow:auto;
+      padding: 4px 2px 2px;
+      scrollbar-width: thin;
+    }
+    .thumb{
+      width: 84px;
+      height: 58px;
+      flex: 0 0 auto;
+      border-radius: 14px;
+      overflow:hidden;
+      border: 2px solid var(--line);
+      background:#fff0f8;
+      cursor:pointer;
+      opacity:.88;
+      transition: transform .12s ease, opacity .12s ease, border-color .12s ease;
+    }
+    .thumb img{ width:100%; height:100%; object-fit: cover; display:block; }
+    .thumb:hover{ transform: translateY(-1px); opacity:1; }
+    .thumb.active{ border-color: var(--pink); opacity:1; }
+
+    /* ===== Pregunta + botones ===== */
+    .qBox{
+      margin-top: 12px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #fff, #fff0f8);
+      border: 2px dashed #ffb9da;
+      padding: 14px;
+    }
+    .q{ margin:0; font-size: clamp(18px, 2vw, 22px); line-height:1.35; }
+
+    .btnZone{
+      margin-top: 12px;
+      display:flex; gap:12px; flex-wrap:wrap; align-items:center;
+      position:relative; min-height: 52px;
+    }
+    .yes{ background: linear-gradient(135deg, var(--pink), #ff2f76); color:#fff; box-shadow: 0 14px 28px rgba(255,95,162,.25); }
+    .no{ background:#fff; color: var(--txt); border: 2px solid var(--line); position:relative; }
+    .pill{
+      display:flex; gap:10px; align-items:flex-start;
+      padding: 12px; border-radius:16px;
+      background:#fff; border:2px solid var(--line);
+      color: var(--muted); font-size:14px; line-height:1.45;
+      margin-top:10px;
+    }
+    .icon{
+      width: 30px; height: 30px;
+      border-radius: 10px;
+      background: #fff0f8;
+      border: 2px solid #ffd1e6;
+      display:grid; place-items:center;
+      flex: 0 0 auto;
+    }
+    .pill b{color:var(--txt)}
+
+    .footer{
+      margin-top: 14px;
+      display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+      color:#9a6a81; font-size: 12.5px;
+    }
+    a.linklike{ color: var(--pink); text-decoration:none; border-bottom: 1px dashed rgba(255,95,162,.6); }
+
+    /* Modal */
+    .backdrop{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.35);
+      display:none; align-items:center; justify-content:center;
+      padding: 18px; z-index: 50;
+    }
+    .modal{
+      width: min(780px, 96vw);
+      background:#fff;
+      border: 2px solid var(--line);
+      border-radius: 22px;
+      box-shadow: 0 26px 60px rgba(0,0,0,.18);
+      padding: 18px;
+      position:relative;
+    }
+    .modalHead{
+      display:flex; justify-content:space-between; align-items:flex-start; gap: 10px; flex-wrap:wrap;
+    }
+    .modal h3{margin: 6px 0 8px; font-size: 22px;}
+    .modal p{margin:0; color: var(--muted); line-height:1.75; font-size: 15px; white-space: pre-wrap;}
+    .modalBtns{display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px;}
+
+    .toast{
+      position: fixed; left: 50%;
+      transform: translateX(-50%);
+      bottom: 18px;
+      background: #fff;
+      border: 2px solid var(--line);
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: var(--muted);
+      box-shadow: 0 18px 40px rgba(0,0,0,.15);
+      opacity: 0;
+      pointer-events:none;
+      z-index: 80;
+      transition: opacity .2s ease, transform .2s ease;
+    }
+    .toast.show{ opacity:1; transform: translateX(-50%) translateY(-4px); }
+  </style>
+</head>
+<body>
+  <div class="floatLayer" id="floatLayer"></div>
+
+  <main class="card" role="main">
+    <header>
+      <div>
+        <div class="badge"><span class="dot"></span> Sorpresa kawaii • con fotos • 14 de febrero 🎀📸</div>
+        <h1 id="title">Tengo una pregunta para ti…</h1>
+        <p class="sub" id="sub">
+          Puse algunas fotos nuestras aquí abajo (para que te acuerdes de lo bonito) 💗
+        </p>
+      </div>
+      <div class="badge">🐱✨ “Kawaii mode” activado</div>
+    </header>
+
+    <section class="grid">
+      <!-- Izquierda -->
+      <div class="panel">
+        <h2>Nuestros momentos 📸</h2>
+
+        <div class="gallery">
+          <div class="frame">
+            <div class="photoArea" id="photoArea">
+              <div class="overlayTop">
+                <span class="tag" id="photoTag">🎀 Foto 1 de 4</span>
+                <span class="tag">💗 recuerdos bonitos</span>
+              </div>
+              <img id="mainPhoto" alt="Foto de nosotros" />
+            </div>
+
+            <div class="controls">
+              <div class="btnRow">
+                <button class="soft" id="prev">⬅️ Anterior</button>
+                <button class="primary" id="next">Siguiente ➡️</button>
+                <button class="ghost" id="burst">Sticker burst ✨</button>
+              </div>
+              <div class="tag" id="caption">“Un recuerdo bonito” 🧁</div>
+            </div>
+
+            <div class="thumbs" id="thumbs"></div>
+          </div>
+        </div>
+
+        <div class="qBox">
+          <p class="q" id="question">
+            ¿Quieres ser mi San Valentín este <b>14</b> y dejarme darte una sorpresa? 💘🎀
+          </p>
+          <div class="btnZone" id="btnZone">
+            <button class="yes" id="yesBtn">Sí, quiero 💖</button>
+            <button class="no" id="noBtn">No 😶</button>
+            <button class="ghost" id="detailsBtn">Ver detalles ✨</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Derecha -->
+      <aside class="panel">
+        <h2>Detalles ✨</h2>
+        <div class="pill">
+          <div class="icon">🧁</div>
+          <div><b>Plan</b><br/>Comer, eso te lo dejo a ti</div>
+        </div>
+        <div class="pill">
+          <div class="icon">🎁</div>
+          <div><b>Sorpresa</b><br/>Un detalle pequeño pero con intención.</div>
+        </div>
+        <div class="pill">
+          <div class="icon">🫶</div>
+          <div><b>Promesa</b><br/>Sin presión, solo un momento bonito.</div>
+        </div>
+
+        <div class="pill">
+          <div class="icon">✍️</div>
+          <div>
+            <b>Tips de fotos</b><br/>
+            Nuestras fotos <code>img/</code> cada momemnto sera fotos renovadas
+          </div>
+        </div>
+
+        <div class="pill">
+          <div class="icon">🔁</div>
+          <div><b>Auto</b><br/>
+            Activa “Siguiente” varias veces… 😄
+          </div>
+        </div>
+
+        <div style="margin-top:10px" class="badge">
+          💡 Recomendado: abre con Live Server
+        </div>
+      </aside>
+    </section>
+
+    <div class="footer">
+      <span>Hecho con 💖 y recuerdos 🎀</span>
+      <span><a class="linklike" href="#" id="reset">Reiniciar</a></span>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div class="backdrop" id="backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modalHead">
+        <div>
+          <h3 id="modalTitle">Mensaje 💌</h3>
+          <p id="modalText"></p>
+        </div>
+        <button class="soft" id="closeBtn">Cerrar</button>
+      </div>
+      <div class="modalBtns">
+        <button class="primary" id="copyBtn">Copiar 📋</button>
+        <button class="ghost" id="swapBtn">Cambiar versión 🔁</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Copiado ✅</div>
+
+  <script>
+    const $ = (q) => document.querySelector(q);
+
+    const floatLayer = $("#floatLayer");
+
+    // ====== 1) CONFIGURA AQUÍ TUS FOTOS ======
+    // Recomendado: crea carpeta "img" y guarda tus fotos ahí.
+    // Ejemplo: img/foto1.jpg, img/foto2.jpg, etc.
+    const PHOTOS = [
+      { src: "img/foto1.jpg", caption: "Aqui pues su real frappe 💗" },
+      { src: "img/foto2.jpg", caption: "Lo hermosa que te vez, una angelita jeje🎀" },
+      { src: "img/foto3.jpg", caption: "Como no amar esos ojitos, tu carita, tus cachetes, guapa 💗" },
+      { src: "img/foto4.jpg", caption: "Un recuerdo para siempre ✨" },
+    ];
+
+    // ====== Galería ======
+    const mainPhoto = $("#mainPhoto");
+    const photoTag = $("#photoTag");
+    const caption = $("#caption");
+    const thumbs = $("#thumbs");
+    const prev = $("#prev");
+    const next = $("#next");
+    const burst = $("#burst");
+
+    let idx = 0;
+
+    function stickersBurst(count = 14){
+      const pool = ["🎀","💗","💖","✨","🌸","🧁","🍓","🐱","⭐","💝","💕"];
+      for(let i=0;i<count;i++){
+        const el = document.createElement("div");
+        el.className = "sticker";
+        el.textContent = pool[Math.floor(Math.random()*pool.length)];
+        const left = Math.random()*100;
+        const size = 16 + Math.random()*22;
+        const dur = 4.5 + Math.random()*4.5;
+        el.style.left = left + "vw";
+        el.style.fontSize = size + "px";
+        el.style.animationDuration = dur + "s";
+        floatLayer.appendChild(el);
+        setTimeout(()=> el.remove(), dur * 1000);
+      }
+    }
+
+    function renderThumbs(){
+      thumbs.innerHTML = "";
+      PHOTOS.forEach((p, i) => {
+        const t = document.createElement("div");
+        t.className = "thumb" + (i === idx ? " active" : "");
+        t.innerHTML = `<img src="${p.src}" alt="Miniatura ${i+1}">`;
+        t.addEventListener("click", () => { idx = i; renderPhoto(); stickersBurst(8); });
+        thumbs.appendChild(t);
+      });
+    }
+
+    function renderPhoto(){
+      const p = PHOTOS[idx];
+      mainPhoto.src = p.src;
+      caption.textContent = p.caption;
+      photoTag.textContent = `🎀 Foto ${idx+1} de ${PHOTOS.length}`;
+      renderThumbs();
+    }
+
+    prev.addEventListener("click", () => {
+      idx = (idx - 1 + PHOTOS.length) % PHOTOS.length;
+      renderPhoto();
+      stickersBurst(10);
+    });
+
+    next.addEventListener("click", () => {
+      idx = (idx + 1) % PHOTOS.length;
+      renderPhoto();
+      stickersBurst(10);
+    });
+
+    burst.addEventListener("click", () => stickersBurst(20));
+
+    // Inicia
+    renderPhoto();
+    stickersBurst(12);
+
+    // Stickers suaves siempre
+    setInterval(() => {
+      const el = document.createElement("div");
+      el.className = "sticker";
+      el.textContent = ["🎀","✨","💗","🌸","⭐","🐱"][Math.floor(Math.random()*6)];
+      el.style.left = (Math.random()*100) + "vw";
+      el.style.fontSize = (14 + Math.random()*18) + "px";
+      el.style.animationDuration = (6 + Math.random()*6) + "s";
+      floatLayer.appendChild(el);
+      setTimeout(()=> el.remove(), 14000);
+    }, 900);
+
+    // ====== Pregunta / Modal ======
+    const yesBtn = $("#yesBtn");
+    const noBtn = $("#noBtn");
+    const detailsBtn = $("#detailsBtn");
+    const btnZone = $("#btnZone");
+    const question = $("#question");
+
+    const backdrop = $("#backdrop");
+    const modalTitle = $("#modalTitle");
+    const modalText = $("#modalText");
+    const closeBtn = $("#closeBtn");
+    const copyBtn = $("#copyBtn");
+    const swapBtn = $("#swapBtn");
+    const toast = $("#toast");
+    const reset = $("#reset");
+
+    let herName = ""; // opcional: si quieres, cambia aquí a su nombre fijo
+    let version = 0;
+
+    function setQuestion(){
+      question.innerHTML =
+        `¿Quieres ser mi San Valentín este <b>14</b>${herName ? `, ${herName}` : ""} y dejarme darte una sorpresa? 💘🎀`;
+    }
+    setQuestion();
+
+    function messages(){
+      const n = herName ? ` ${herName}` : "";
+      return [
+`Holaa${n} 🎀💖
+
+Este 14 quiero invitarte a un plan bonito y súper tierno.
+Prometo cuidarte, hacerte sonreír, y darte un detallito especial.
+Quiero llevarme un recuerdo mas de nostros, y espero que sea uno de los mejores.
+Te amo un montón mi renegoncita hermosa, preciosa, nadie omo tutu.
+
+¿Quieres ser mi San Valentín? 💘🐱`,
+`Oye${n} 🌸✨
+
+Tengo una propuesta kawaii:
+un rato contigo, algo dulce, fotos lindas…
+y un “sí” que me haga feliz todo el día.
+
+¿Aceptas ser mi San Valentín? 🎀💝`,
+`Mi amor${n ? "," + n : ""} 🍓💗
+
+No quiero hacerlo perfecto, solo hacerlo contigo.
+Este 14 quiero darte cariño, tranquilidad y un detallito con intención.`
+      ];
+    }
+
+    function openModal(kind){
+      if(kind === "details"){
+        modalTitle.textContent = "Detalles ✨";
+        modalText.textContent =
+`Plan sugerido:
+• Comer, eso te lo dejo a ti 🧁
+• Paseo, tomarnos fotitos 🌸
+• Quiero estar solamente contigo, solos sin que nadie intervenga 💗
+• Y mi detalle sorpresa, ya lo verás ese día 🎁🎀
+
+Si dices que sí, te doy un abrazo y muchos besos loca  🫶`;
+      }else{
+        modalTitle.textContent = "¡Dijiste que sí! 💖";
+        modalText.textContent = messages()[version % messages().length];
+      }
+      backdrop.style.display = "flex";
+      backdrop.setAttribute("aria-hidden","false");
+    }
+    function closeModal(){
+      backdrop.style.display = "none";
+      backdrop.setAttribute("aria-hidden","true");
+    }
+    closeBtn.addEventListener("click", closeModal);
+    backdrop.addEventListener("click", (e)=>{ if(e.target === backdrop) closeModal(); });
+
+    async function copyText(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        toast.textContent = "Copiado ✅";
+      }catch{
+        toast.textContent = "No se pudo copiar 😅";
+      }
+      toast.classList.add("show");
+      setTimeout(()=> toast.classList.remove("show"), 1200);
+    }
+    copyBtn.addEventListener("click", ()=> copyText(modalText.textContent));
+    swapBtn.addEventListener("click", ()=>{
+      version++;
+      openModal("yes");
+      stickersBurst(10);
+    });
+
+    // Botón NO que se escapa
+    function moveNo(){
+      const zone = btnZone.getBoundingClientRect();
+      const btn = noBtn.getBoundingClientRect();
+      const pad = 8;
+      const maxX = zone.width - btn.width - pad;
+      const maxY = zone.height - btn.height - pad;
+      const x = pad + Math.random()*Math.max(0, maxX);
+      const y = pad + Math.random()*Math.max(0, maxY);
+
+      noBtn.style.position = "absolute";
+      noBtn.style.left = x + "px";
+      noBtn.style.top = y + "px";
+      stickersBurst(6);
+    }
+    noBtn.addEventListener("mouseenter", moveNo);
+    noBtn.addEventListener("touchstart", (e)=>{ e.preventDefault(); moveNo(); }, {passive:false});
+    noBtn.addEventListener("click", moveNo);
+
+    detailsBtn.addEventListener("click", ()=>{
+      openModal("details");
+      stickersBurst(10);
+    });
+
+    yesBtn.addEventListener("click", ()=>{
+      openModal("yes");
+      stickersBurst(26);
+      noBtn.style.display = "none";
+    });
+
+    reset.addEventListener("click", (e)=>{ e.preventDefault(); location.reload(); });
+  </script>
+</body>
+</html>
